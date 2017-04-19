@@ -22,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.facebook.FacebookException;
@@ -30,12 +31,18 @@ import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
+import com.facebook.Profile;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.facebook.login.widget.ProfilePictureView;
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONObject;
 
+import java.net.URL;
 import java.util.Arrays;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 
 public class Eureka extends AppCompatActivity
@@ -67,6 +74,7 @@ public class Eureka extends AppCompatActivity
         callbackManager = CallbackManager.Factory.create();
 
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+
             @Override
             public void onSuccess(final LoginResult loginResult) {
                 // App code
@@ -83,13 +91,18 @@ public class Eureka extends AppCompatActivity
                                     TextView profileName = (TextView) findViewById(R.id.profileName);
                                     emailID.setText(object.getString("email"));
                                     profileName.setText(object.getString("name"));
+
+                                    // Profile Image
+                                    CircleImageView imageView = (CircleImageView) findViewById(R.id.profileImage);
+                                    Picasso.with(getApplicationContext()).load("https://graph.facebook.com/v2.2/" + loginResult.getAccessToken().getUserId() + "/picture?height=120&type=normal") //extract as User instance method
+                                            .into(imageView);
                                 } catch (Exception e) {
                                     System.out.println("Error caught");
                                 }
                             }
                         });
                 Bundle parameters = new Bundle();
-                parameters.putString("fields", "id,name,email,gender,birthday");
+                parameters.putString("fields", "id,name,email,gender,birthday, picture");
                 request.setParameters(parameters);
                 request.executeAsync();
             }
